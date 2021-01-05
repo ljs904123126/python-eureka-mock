@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>My Webpage</title>
+</head>
+<body>
+    <table>
+        {% for item in res %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.host }}</td>
+            <td>{{ item.port }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <ul id="navigation">
+
+    </ul>
+
+</body>
+</html>

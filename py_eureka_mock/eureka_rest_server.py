@@ -2,6 +2,7 @@ import threading
 import time
 from py_eureka_client import eureka_client
 import logging
+from flask import Flask
 
 
 class RestServer:
@@ -11,8 +12,11 @@ class RestServer:
         self.port = port
         self.name = name
         self.eureka_server = eureka_server
+
         # self.regist: SimpleRegistThread = None
         self.eureka_client: eureka_client.EurekaClient = None
+        self.app: AppThread = AppThread(port=port)
+        # self.app.setDaemon(False)
 
     def start(self):
         # self.regist = SimpleRegistThread(host=self.host, port=self.port, name=self.name,
@@ -21,9 +25,9 @@ class RestServer:
         self.eureka_client = eureka_client.EurekaClient(eureka_server=self.eureka_server,
                                                         app_name=self.name,
                                                         instance_host=self.host,
-                                                        instance_port=self.port,
-                                                        renewal_interval_in_secs=5)
+                                                        instance_port=self.port)
         self.eureka_client.start()
+        self.app.start()
 
     def stop(self):
         self.eureka_client.stop()
@@ -31,6 +35,25 @@ class RestServer:
 
     def do_service(self):
         pass
+
+
+class AppThread(threading.Thread):
+
+    def __init__(self, port: int):
+        super(AppThread, self).__init__()
+        self.port = port
+        self.app = Flask("app-server-" + str(port))
+        self.app.add_url_rule("/<path:dummy>", view_func=self.handle)
+
+    def setDaemon(self, daemonic: bool) -> None:
+        super().setDaemon(daemonic)
+
+    def run(self) -> None:
+        super().run()
+        self.app.run(host="0.0.0.0", port=self.port)
+
+    def handle(self, dummy):
+        return "Hello World!! path = " + dummy
 
 # class SimpleRegistThread(threading.Thread):
 #
